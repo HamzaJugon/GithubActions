@@ -11,16 +11,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Add label
-        uses: octokit/request-action@v2.x
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          route: POST /repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels
-          headers: |
-            {
-              "Authorization": "token ${{ secrets.GITHUB_TOKEN }}",
-              "Content-Type": "application/json"
-            }
-          body: |
-            {
-              "labels": ["hello"]
-            }
+          node-version: '16'
+
+      - name: Add label
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const payload = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['hello']  # Change the label name to 'hello'
+            };
+
+            await github.issues.addLabels(payload);
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
